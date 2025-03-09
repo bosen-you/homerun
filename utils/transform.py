@@ -45,7 +45,3 @@ def plot_frequency_spectrum(audio, rate, title, save_path=None):
         plt.savefig(save_path) 
     plt.show()  
     plt.close()
-
-if __name__ == '__main__':
-    plot_waveform()
-    plot_frequency_spectrum()
