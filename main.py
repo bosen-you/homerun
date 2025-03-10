@@ -1,11 +1,21 @@
 from utils import *
 import os
 from scipy.io import wavfile 
+from machine import Pin,SoftI2C
+import ssd1306  
+
+i2c = SoftI2C(scl=Pin(22), sda=Pin(21), freq=100000)  #Init i2c
+lcd=ssd1306.SSD1306_I2C(128,64,i2c)    
 
 if __name__ == '__main__':
     try:
         action = int(input("輸入數字就好了\n1. transform\n2. compare\n3. encode\n4. decode\n"))
         if action == 1:
+            # ssd1306
+            lcd.fill(0)
+            lcd.text("transform",20,52)       #set "" at (0,0)
+            lcd.show()#display
+            # 
             rate, audio, desktop_path = select_audio_file()
             waveform_img_path = os.path.join(desktop_path, "waveform.png")
             spectrum_img_path = os.path.join(desktop_path, "spectrum.png")
@@ -18,6 +28,12 @@ if __name__ == '__main__':
             plot_frequency_spectrum(audio, rate, "Original Audio", save_path=spectrum_img_path)
             print(f"頻譜圖已保存至: {spectrum_img_path}")
         elif action == 2:
+            # ssd1306
+            lcd.fill(0)
+            lcd.text("compare",20,52)       #set "" at (0,0)
+            lcd.show()#display
+
+            #
             rate1, audio1, desktop_path = select_audio_file()
             rate2, audio2, _ = select_audio_file()
 
@@ -39,6 +55,12 @@ if __name__ == '__main__':
                 exit(1)
             
         elif action == 3:
+            # ssd1306
+            lcd.fill(0)
+            lcd.text("encode",20,52)       #set "" at (0,0)
+            lcd.show()#display
+
+            #
             rate, audio, desktop_path = select_audio_file()
 
             encryption_id = generate_encryption_id()
@@ -51,6 +73,12 @@ if __name__ == '__main__':
             print(f"嵌入完成，結果已保存至: {output_path}")
            
         elif action == 4:
+            # ssd1306
+            lcd.fill(0)
+            lcd.text("decode",20,52)       #set "" at (0,0)
+            lcd.show()#display
+
+            #
             rate, audio, desktop_path = select_audio_file()
             extracted_id = extract_watermark(audio)
             psw = input("請輸入密鑰進行驗證: ")
