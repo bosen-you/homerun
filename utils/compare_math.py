@@ -18,7 +18,7 @@ def analyze_audio_similarity(rate1, audio1, rate2, audio2):
     if rate1 != rate2:
         print("採樣率不同，正在重採樣...")
         if rate1 > rate2:
-            audio1 = resample(audio1, int(len(audio1) * rate2 / rate1))
+            audio1 = resample(audio1, int(len(audio1) * rate2 / rate1)) #把audio重新採樣，讓rate1 = rate2(rate1 變成 rate2)
         else:
             audio2 = resample(audio2, int(len(audio2) * rate1 / rate2))
         rate1 = rate2 = min(rate1, rate2)
