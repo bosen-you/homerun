@@ -5,12 +5,12 @@ import sys
 from PyQt6.QtWidgets import QApplication, QFileDialog
 
 def select_audio_file():
-    app = QApplication(sys.argv)  
+    app = QApplication(sys.argv)  #初始化GUI介面
     file_path, _ = QFileDialog.getOpenFileName(
-        None,
-        "選擇音頻文件",
-        "",
-        "WAV files (*.wav);;All files (*.*)"
+        None, #沒有父視窗
+        "選擇音頻文件", #對話框標題
+        "", #預設路徑
+        "WAV files (*.wav);;All files (*.*)" #接受檔案格式
     )
 
     if file_path:
@@ -26,7 +26,7 @@ def select_audio_file():
     rate, audio = wavfile.read(file_path)   
     if audio.dtype != np.int16:
         audio = audio.astype(np.int16)
-    desktop_path = os.path.join(os.path.expanduser("~"), "watermark")
+    desktop_path = os.path.join(os.path.expanduser("~"), "watermark") #獲取用戶名 ex: C:\User\user\bosenda\watermark
 
     if not os.path.exists(desktop_path):
         os.makedirs(desktop_path)
