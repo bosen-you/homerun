@@ -1,55 +1,62 @@
+import librosa
+import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import resample 
-import os
 
-def plot_audio_comparison(rate1, audio1, desktop_path, audio2):
-    """ 使用選擇的音檔，繪製波形與頻譜比較圖 """
-    save_path = os.path.join(desktop_path, "comparison.png")
+# 設定取樣率
+SR = 44100  # 取樣率（音樂 22050 / 語音 16000）
 
-    # 轉換為單聲道
-    if len(audio1.shape) > 1:
-        audio1 = audio1.mean(axis=1).astype(np.int16)
-    if len(audio2.shape) > 1:
-        audio2 = audio2.mean(axis=1).astype(np.int16)
+# 讀取音檔
+def load_audio(file_path, sr=SR):
+    y, sr = librosa.load(file_path, sr=sr)
+    return y, sr
 
-    # 讓兩個音檔長度相同
-    min_length = min(len(audio1), len(audio2))
-    audio1, audio2 = audio1[:min_length], audio2[:min_length]
+# 繪製波形圖
+def plot_waveform(audio_path1, audio_path2):
+    y1, sr1 = load_audio(audio_path1)
+    y2, sr2 = load_audio(audio_path2)
 
-    # 計算時間軸
-    time = np.linspace(0, min_length / rate1, num=min_length)
+    plt.figure(figsize=(12, 4))
 
-    # 計算 FFT 頻譜
-    fft1 = np.fft.fft(audio1)
-    fft2 = np.fft.fft(audio2)
-    freqs = np.fft.fftfreq(min_length, 1 / rate1)[:min_length // 2]
-
-    # 繪製比較圖
-    plt.figure(figsize=(12, 8))
-
-    # 波形比較
+    # 第一個音檔
     plt.subplot(2, 1, 1)
-    plt.plot(time, audio1, label="音檔 1", alpha=0.7)
-    plt.plot(time, audio2, label="音檔 2", alpha=0.7)
-    plt.title("波形比較")
-    plt.xlabel("時間 (秒)")
-    plt.ylabel("振幅")
-    plt.legend()
+    librosa.display.waveshow(y1, sr=sr1, alpha=0.7)
+    plt.title("Waveform - Audio 1")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Amplitude")
 
-    # 頻譜比較
+    # 第二個音檔
     plt.subplot(2, 1, 2)
-    plt.plot(freqs, np.abs(fft1[:min_length // 2]), label="音檔 1 頻譜", alpha=0.7)
-    plt.plot(freqs, np.abs(fft2[:min_length // 2]), label="音檔 2 頻譜", alpha=0.7)
-    plt.title("頻譜比較")
-    plt.xlabel("頻率 (Hz)")
-    plt.ylabel("振幅")
-    plt.legend()
+    librosa.display.waveshow(y2, sr=sr2, alpha=0.7, color="orange")
+    plt.title("Waveform - Audio 2")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Amplitude")
 
     plt.tight_layout()
-
-    # 存檔
-    plt.savefig(save_path)
-    print(f"比較結果已儲存到: {save_path}")
-
     plt.show()
+
+# 繪製頻譜圖
+def plot_spectrogram(audio_path1, audio_path2):
+    y1, sr1 = load_audio(audio_path1)
+    y2, sr2 = load_audio(audio_path2)
+
+    plt.figure(figsize=(12, 6))
+
+    # 第一個音檔
+    plt.subplot(2, 1, 1)
+    D1 = librosa.amplitude_to_db(np.abs(librosa.stft(y1)), ref=np.max)
+    librosa.display.specshow(D1, sr=sr1, x_axis="time", y_axis="log")
+    plt.colorbar(format="%+2.0f dB")
+    plt.title("Spectrogram - Audio 1")
+
+    # 第二個音檔
+    plt.subplot(2, 1, 2)
+    D2 = librosa.amplitude_to_db(np.abs(librosa.stft(y2)), ref=np.max)
+    librosa.display.specshow(D2, sr=sr2, x_axis="time", y_axis="log")
+    plt.colorbar(format="%+2.0f dB")
+    plt.title("Spectrogram - Audio 2")
+
+    plt.tight_layout()
+    plt.show()
+
+
