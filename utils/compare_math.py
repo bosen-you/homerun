@@ -1,39 +1,66 @@
-import matplotlib.pyplot as plt
+import librosa
 import numpy as np
-from scipy.signal import resample 
+from scipy.spatial.distance import euclidean
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import normalize
+from fastdtw import fastdtw  # 更快的 DTW
+import os
 
-def analyze_audio_similarity(rate1, audio1, rate2, audio2):
-    """ 使用選擇的音檔，計算相似度（整數百分比） """
-    # 轉換為單聲道
-    if len(audio1.shape) > 1:
-        audio1 = audio1.mean(axis=1).astype(np.int16)
-    if len(audio2.shape) > 1:
-        audio2 = audio2.mean(axis=1).astype(np.int16)
+# 設定 MFCC 參數
+N_MFCC = 25  # 可以調低以加速運算
+SR = 44100  # 降低取樣率，加快處理速度
 
-    # 讓兩個音檔的長度相同
-    min_length = min(len(audio1), len(audio2))
-    audio1, audio2 = audio1[:min_length], audio2[:min_length]
+# 預計算 MFCC 以避免重複計算
+def compute_mfcc(audio_path):
+    y, sr = librosa.load(audio_path, sr=SR)  # 固定取樣率
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=N_MFCC)
+    return np.mean(mfcc, axis=1), mfcc.T  # 回傳均值和完整 MFCC
 
-    # 採樣率不同，則重採樣
-    if rate1 != rate2:
-        print("採樣率不同，正在重採樣...")
-        if rate1 > rate2:
-            audio1 = resample(audio1, int(len(audio1) * rate2 / rate1)) #把audio重新採樣，讓rate1 = rate2(rate1 變成 rate2)
-        else:
-            audio2 = resample(audio2, int(len(audio2) * rate1 / rate2))
-        rate1 = rate2 = min(rate1, rate2)
+# 快速 DTW（使用 fastdtw）
+def compute_dtw(mfcc1, mfcc2):
+    distance, _ = fastdtw(mfcc1, mfcc2, radius=5, dist=euclidean)  # fastdtw 取代 dtw
+    return distance
 
-    # 計算均方誤差（MSE）
-    mse = np.mean((audio1 - audio2) ** 2)
+# 計算歐式距離
+def compute_euclidean(mfcc1_mean, mfcc2_mean):
+    return np.linalg.norm(mfcc1_mean - mfcc2_mean)
 
-    # 計算皮爾遜相關係數
-    correlation = np.corrcoef(audio1, audio2)[0, 1]
+# 計算余弦相似度
+def compute_cosine_similarity(mfcc1_mean, mfcc2_mean):
+    # 轉換成 (1, N) 形狀
+    mfcc1_mean = mfcc1_mean.reshape(1, -1)
+    mfcc2_mean = mfcc2_mean.reshape(1, -1)
 
-    # 轉換為相似度百分比
-    mse_similarity = max(0, 100 - int(mse / np.max(audio1) * 100))  # 低誤差代表高相似度
-    correlation_similarity = int((correlation + 1) / 2 * 100)  # 相關係數轉換為 0-100%
+    # 確保向量歸一化
+    mfcc1_mean = normalize(mfcc1_mean)
+    mfcc2_mean = normalize(mfcc2_mean)
 
-    # 計算平均相似度（四捨五入）
-    final_similarity = round((mse_similarity + correlation_similarity) / 2)
+    return np.clip(cosine_similarity(mfcc1_mean, mfcc2_mean)[0][0], -1.0, 1.0)
 
-    return final_similarity
+# 比對音頻
+def compare_audio(audio_path1, audio_path2):
+    print(f"Comparing {audio_path1} and {audio_path2}:")
+
+    # 預計算 MFCC
+    mfcc1_mean, mfcc1 = compute_mfcc(audio_path1)
+    mfcc2_mean, mfcc2 = compute_mfcc(audio_path2)
+
+    # 1️⃣ MFCC 歐式距離
+    euclidean_distance = compute_euclidean(mfcc1_mean, mfcc2_mean)
+    euclidean_similarity = max(0, 100 - (euclidean_distance / 100 * 100))  # 假設最大值 100
+
+    # 2️⃣ DTW 距離
+    dtw_distance = compute_dtw(mfcc1, mfcc2)
+    dtw_similarity = max(0, 100 - (dtw_distance / 500 * 100))  # 假設最大值 500
+
+    # 3️⃣ 余弦相似度
+    cosine_sim = compute_cosine_similarity(mfcc1_mean, mfcc2_mean)
+    cosine_similarity_percent = (cosine_sim + 1) / 2 * 100
+
+    # 計算平均相似度
+    avg_similarity = (euclidean_similarity + dtw_similarity + cosine_similarity_percent) / 3
+
+    print(f"MFCC Euclidean similarity: {euclidean_similarity:.2f}%")
+    print(f"DTW similarity: {dtw_similarity:.2f}%")
+    print(f"Cosine similarity: {cosine_similarity_percent:.2f}%")
+    return f"🔹 **Overall Similarity: {avg_similarity:.2f}%** 🔹"  # 總相似度
