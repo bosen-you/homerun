@@ -5,16 +5,15 @@ from machine import Pin,SoftI2C
 import ssd1306  
 
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21), freq=100000)  #Init i2c
-lcd=ssd1306.SSD1306_I2C(128,64,i2c)    
+lcd = ssd1306.SSD1306_I2C(128,64,i2c)    
 
 if __name__ == '__main__':
     try:
         action = int(input("輸入數字就好了\n1. transform\n2. compare\n3. encode\n4. decode\n"))
         if action == 1:
             lcd.fill(0)
-            lcd.text("transform",0,0)       #set "" at (0,0)
+            lcd.text("transform", 20, 52)       #set "" at (0,0)
             lcd.show()#display
-
             rate, audio, path = select_audio_file()
             waveform_img_path = os.path.join(path, "waveform.png")
             spectrum_img_path = os.path.join(path, "spectrum.png")
@@ -22,13 +21,16 @@ if __name__ == '__main__':
             # 繪製並顯示+儲存波形圖
             plot_waveform(audio, audio, rate, "Waveform Watermark", "encode", save_path=waveform_img_path)
             print(f"波形圖已保存至: {waveform_img_path}")
-
+            
             # 繪製並顯示+儲存頻譜圖
             plot_frequency_spectrum(audio, rate, "Original Audio", save_path=spectrum_img_path)
             print(f"頻譜圖已保存至: {spectrum_img_path}")
+            lcd.text('successfully', 5, 16)
+            lcd.show()#display
+        
         elif action == 2:
             lcd.fill(0)
-            lcd.text("compare",0,0)       #set "" at (0,0)
+            lcd.text("compare", 20, 52)       #set "" at (0,0)
             lcd.show()#display
             
             path1 = select_audio_file_path()
@@ -36,34 +38,38 @@ if __name__ == '__main__':
 
             cho = int(input('輸入數字就好了\n1. 顯示數據比較\n2. 顯示圖片比較\n'))
             if cho == 1:
-                lcd.text("data analysis", 20, 52)
-
+                lcd.text("data analysis", 5, 16)
+                lcd.show()
                 final = compare_audio(path1, path2)
                 l = ['0% ~ 0%\nRisk-free', '20% ~ 40%\nSecure', '40% ~ 60%\nModerate', '60% ~ 80%\nDangerous', '80% ~ 100%\nHazardous']
                 rate_check = [[0, 0], [20, 40], [40, 60], [60, 80], [80, 101]]
                 
                 for i in range(5):
                     if rate_check[i][1] > final >= rate_check[i][0]:
-                        print(l[i])
+                        lcd.text(l[i], 10, 32)
                         break
                     
             elif cho == 2:
-                lcd.text("graph analysis", 20, 52)
+                lcd.text("graph analysis", 5, 16)
                 chose = input('輸入數字就好了\n1. 波型圖\n2. 頻譜圖\n')
                 if chose == '1':
+                    lcd.text('waveform', 10, 32)
                     plot_waveform(path1, path2)
                 elif chose == '2':
+                    lcd.text('frequency form', 10, 32)
                     plot_spectrogram(path1, path2)
                 else:
-                    print("輸入格式錯誤")
+                    lcd.text("input format error", 10, 32)
+                    lcd.show()
                     exit(1)
             else: 
-                print("輸入格式錯誤")
+                lcd.text('input format error', 0, 0)
+                lcd.show()
                 exit(1)
             
         elif action == 3:
             lcd.fill(0)
-            lcd.text("encode",0,0)       #set "" at (0,0)
+            lcd.text("encode",20, 52)       #set "" at (0,0)
             lcd.show()#display
 
             rate, audio, path = select_audio_file()
@@ -76,10 +82,12 @@ if __name__ == '__main__':
             output_path = os.path.join(path, f"{output_name}_{encryption_id}.wav")
             wavfile.write(output_path, rate, encoded_audio)
             print(f"嵌入完成，結果已保存至: {output_path}")
+            lcd.text('successfully', 5, 16)
+            lcd.shoe()
            
         elif action == 4:
             lcd.fill(0)
-            lcd.text("decode",0 ,0)       #set "" at (0,0)
+            lcd.text("decode",20 ,52)       #set "" at (0,0)
             lcd.show()#display
 
             rate, audio, path = select_audio_file()
@@ -93,12 +101,11 @@ if __name__ == '__main__':
                     output_path = os.path.join(path, f"{output_name}_watermark_removed.wav")
                     wavfile.write(output_path, rate, audio)
                     print(f"水印已移除，解密後的音頻已保存至: {output_path}")
+                    lcd.text('successfully', 5, 16)
 
             else:
-                print("密鑰錯誤！操作中止。")
-
-        else:
-            print("無效選項，請重新執行程式！")
+                lcd.text("input format error", 5, 16)
     
     except Exception as e:
-        print(f"程式執行錯誤: {e}")
+        lcd.text('failed', 0, 0)
+        print('程式碼錯誤：', e)
