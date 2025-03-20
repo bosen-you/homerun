@@ -35,5 +35,6 @@ def embed_watermark(audio, encryption_id):
 def speed_up_audio(audio, rate, speed_factor=2.0):
     num_samples = int(len(audio) / speed_factor)
     resampled_audio = resample(audio, num_samples) # resampling the audio
-    resampled_audio = np.clip(resampled_audio, -32768, 32767).astype(np.int16) # clipping and type conversion
+    # clips the resampled audio values to fit within the range of 16-bit signed integers, which is the typical range for audio samples.
+    resampled_audio = np.clip(resampled_audio, -32768, 32767).astype(np.int16)
     return resampled_audio
