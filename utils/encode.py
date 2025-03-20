@@ -1,15 +1,15 @@
 import random
 from scipy.signal import resample
 import numpy as np
-# 隨機生成 8 位十六進位字串
+# generate random hex string 
 def generate_random_hex_string():
     return ''.join(random.choice('0123456789ABCDEF') for _ in range(8))
 
-# XOR 運算並返回十六進位字串
+# bytes xor to hex string
 def bytes_xor_to_hexstring(ba1, ba2):
     return bytes([a ^ b for a, b in zip(ba1, ba2)]).hex()
 
-# 生成加密標識（8 位）
+# generate encryption id
 def generate_encryption_id():
     A1 = generate_random_hex_string()
     A2 = generate_random_hex_string()
@@ -21,17 +21,19 @@ def generate_encryption_id():
     print(f"浮水印密鑰，請妥善保存: {final_id}")
     return final_id
 
-# 嵌入加密標識
+# embed watermark
 def embed_watermark(audio, encryption_id):
-    watermark_bits = ''.join(format(int(char, 16), '04b') for char in encryption_id)
-    audio = audio.flatten()
+    watermark_bits = ''.join(format(int(char, 16), '04b') for char in encryption_id) # converts each hexadecimal character into a 4-bit binary represent ation and concatenates all the binary strings
+    audio = audio.flatten() # from multi-dimensional to one dimensional
+
+    # LSB
     for i, bit in enumerate(watermark_bits):
         audio[i] = (audio[i] & ~1) | int(bit)
     return audio
 
-#將音訊加速 2 倍
+# speed up audio
 def speed_up_audio(audio, rate, speed_factor=2.0):
     num_samples = int(len(audio) / speed_factor)
-    resampled_audio = resample(audio, num_samples)
-    resampled_audio = np.clip(resampled_audio, -32768, 32767).astype(np.int16)
+    resampled_audio = resample(audio, num_samples) # resampling the audio
+    resampled_audio = np.clip(resampled_audio, -32768, 32767).astype(np.int16) # clipping and type conversion
     return resampled_audio
