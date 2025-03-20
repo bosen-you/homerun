@@ -45,15 +45,15 @@ def compare_audio(audio_path1, audio_path2):
     mfcc1_mean, mfcc1 = compute_mfcc(audio_path1)
     mfcc2_mean, mfcc2 = compute_mfcc(audio_path2)
 
-    # 1️⃣ MFCC Euclidean Distance
+    # MFCC Euclidean Distance
     euclidean_distance = compute_euclidean(mfcc1_mean, mfcc2_mean)
     euclidean_similarity = max(0, 100 - (euclidean_distance / 100 * 100))  # Assuming the maximum value is 100
 
-    # 2️⃣ DTW Distance
+    # DTW Distance
     dtw_distance = compute_dtw(mfcc1, mfcc2)
     dtw_similarity = max(0, 100 - (dtw_distance / 500 * 100))  # Assuming the maximum value is 500
 
-    # 3️⃣ Cosine Similarity
+    # Cosine Similarity
     cosine_sim = compute_cosine_similarity(mfcc1_mean, mfcc2_mean)
     cosine_similarity_percent = (cosine_sim + 1) / 2 * 100
 
