@@ -1,0 +1,19 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  text-align: center;
+}
+
+h1 {
+  color: #333;
+}
+
+section {
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+canvas {
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
