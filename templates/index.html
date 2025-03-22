@@ -1,1 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端音訊處理範例</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>前端音訊處理範例</h1>
+  
+  <section>
+    <h2>上傳 .wav 音檔（限定兩個）</h2>
+    <!-- 限定上傳 .wav 檔案 -->
+    <input type="file" id="audioFile1" accept=".wav,audio/wav" />
+    <input type="file" id="audioFile2" accept=".wav,audio/wav" />
+    <button id="processBtn">開始處理</button>
+  </section>
+
+  <section>
+    <h2>結果</h2>
+    <canvas id="waveform1" width="600" height="200"></canvas>
+    <canvas id="waveform2" width="600" height="200"></canvas>
+    <p id="compareResult"></p>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
