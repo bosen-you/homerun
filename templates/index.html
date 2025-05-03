@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>音檔處理系統</title>
+  <style>
+    body { display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; background:#f4f4f4; font-family:Arial, sans-serif; }
+    .container { width:800px; background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    .upload-container { display:flex; flex-wrap:wrap; justify-content:space-between; gap:15px; }
+    .upload-section { flex:1; min-width:250px; max-width:300px; padding:15px; border:1px solid #ddd; border-radius:8px; background:#fafafa; text-align:center; }
+    button, input[type="file"] { cursor:pointer; border-radius:5px; margin-top:10px; }
+    button { padding:10px 20px; border:none; background:#007bff; color:#fff; transition:background 0.3s; }
+    button:hover { background:#0056b3; }
+    .options { display:none; margin-top:10px; }
+    h1, h3 { text-align:center; }
+    #resultarea { font-size:1.2em; line-height:1.6; white-space:pre-wrap; margin-top:10px; }
+    #output-images { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px; }
+    .image-container, .audio-container { text-align:center; margin-top:10px; }
+    .image-container img, .audio-container audio { max-width:100%; border-radius:10px; }
+    .download-link { display:inline-block; margin-top:5px; padding:8px 16px; background:#007bff; color:#fff; border:none; border-radius:5px; text-decoration:none; cursor:pointer; transition:background 0.3s; }
+    .download-link:hover { background:#0056b3; text-decoration:none; }
+    #espControls { text-align:center; margin-top:15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>音檔處理系統</h1>
+    <div class="upload-container">
+      <!-- Transform -->
+      <div class="upload-section">
+        <h3>Transform</h3>
+        <input type="file" id="transform-input" accept=".wav">
+        <button id="transform-upload">上傳並選擇</button>
+        <div class="options" id="transform-options">
+          <button data-type="waveform">波形圖</button>
+          <button data-type="spectrogram">頻譜圖</button>
+        </div>
+      </div>
+      <!-- Compare -->
+      <div class="upload-section">
+        <h3>Compare</h3>
+        <input type="file" id="compare-input" accept=".wav" multiple>
+        <button id="compare-upload">上傳並選擇</button>
+        <div class="options" id="compare-options">
+          <button data-type="waveform">波形圖 + 分析</button>
+          <button data-type="spectrogram">頻譜圖 + 分析</button>
+        </div>
+      </div>
+      <!-- Encode -->
+      <div class="upload-section">
+        <h3>Encode</h3>
+        <input type="file" id="encode-input" accept=".wav">
+        <button id="encode-btn">Encode</button>
+      </div>
+      <!-- Decode -->
+      <div class="upload-section">
+        <h3>Decode</h3>
+        <input type="file" id="decode-input" accept=".wav">
+        <button id="decode-btn">Decode</button>
+      </div>
+    </div>
+    <h3>處理結果</h3>
+    <pre id="resultarea"></pre>
+    <div id="output-images"></div>
+    <div id="espControls">
+      <button id="uploadToESP32">將第2張圖片 URL 傳送至後端</button>
+    </div>
+  </div>
+
+  <script>
+    // 結果文字著色處理：總平均與危險程度
+    function highlightResultText(text) {
+      return text.split('\n').map(line => {
+        if (line.includes('總平均')) {
+          const colorlvl = {
+            '0% ~ 0%': '#000000',
+            '20% ~ 40%': '#27ae60',
+            '40% ~ 60%': '#f39c12',
+            '60% ~ 80%': '#e74c3c',
+            '80% ~ 100%': '#c0392b',
+
+          }
+          const level = Object.keys(colorlvl).find(k => line.includes(k));
+          if (level) {
+            return line.replace(/(總平均[:：]?\s*)(\d+%\s*~\s*\d+%)/, (m, p1, p2) =>
+            `${p1}<span style="color:${colorlvl[level]}">${p2}</span>`);
+          }
+        }
+        if (line.includes('危險程度')) {
+          const colorMap = {
+            'Risk-free': '#2ecc71',
+            'Secure': '#27ae60',
+            'Moderate': '#f39c12',
+            'Dangerous': '#e74c3c',
+            'Hazardous': '#c0392b'
+          };
+          const level = Object.keys(colorMap).find(k => line.includes(k));
+          if (level) {
+            return line.replace(level, `<span style="color:${colorMap[level]}">${level}</span>`);
+          }
+        }
+        return line;
+      }).join('\n');
+    }
+  
+    document.addEventListener('DOMContentLoaded', () => {
+      const resultArea = document.getElementById('resultarea');
+      const output = document.getElementById('output-images');
+  
+      function clearAll() {
+        resultArea.innerHTML = '';
+        output.innerHTML = '';
+      }
+  
+      function appendImage(url, filename) {
+        const div = document.createElement('div');
+        div.className = 'image-container';
+        const img = document.createElement('img');
+        img.src = url;
+        div.appendChild(img);
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.download = filename;
+        a.className = 'download-link';
+        a.textContent = '下載圖片';
+        div.appendChild(a);
+        output.appendChild(div);
+      }
+  
+      function appendAudio(url, filename) {
+        const div = document.createElement('div');
+        div.className = 'audio-container';
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = url;
+        div.appendChild(audio);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.className = 'download-link';
+        a.textContent = '下載音檔';
+        div.appendChild(a);
+        output.appendChild(div);
+      }
+  
+      // Transform
+      document.getElementById('transform-upload').onclick = () => {
+        const inp = document.getElementById('transform-input');
+        if (!inp.files[0]) return alert('請選擇音檔');
+        document.getElementById('transform-options').style.display = 'block';
+      };
+      document.querySelectorAll('#transform-options button').forEach(btn => {
+        btn.onclick = async () => {
+          clearAll();
+          const kind = btn.dataset.type;
+          const inp = document.getElementById('transform-input');
+          const fd = new FormData();
+          fd.append('file', inp.files[0]);
+          fd.append('kind', kind);
+          fd.append('extra', '');
+          const res = await fetch('/transform', { method: 'POST', body: fd });
+          const r = await res.json();
+          ['photo', 'bmp_photo'].forEach((key, idx) => {
+            if (r[key]) appendImage(r[key], `transform_${idx ? 'bmp' : 'photo'}.png`);
+          });
+        };
+      });
+  
+      // Compare
+      document.getElementById('compare-upload').onclick = () => {
+        const inp = document.getElementById('compare-input');
+        if (inp.files.length < 2) return alert('請選擇兩個音檔');
+        document.getElementById('compare-options').style.display = 'block';
+      };
+      document.querySelectorAll('#compare-options button').forEach(btn => {
+        btn.onclick = async () => {
+          clearAll();
+          const kind = btn.dataset.type;
+          const inp = document.getElementById('compare-input');
+  
+          // Step 1：數據分析
+          const fdData = new FormData();
+          fdData.append('file1', inp.files[0]);
+          fdData.append('file2', inp.files[1]);
+          fdData.append('kind', 'data');
+          fdData.append('extra', '');
+          const dataRes = await fetch('/compare', { method: 'POST', body: fdData });
+          const dataR = await dataRes.json();
+          resultArea.innerHTML = highlightResultText(dataR.result || '無資料');
+  
+          // Step 2：圖像
+          const fdImg = new FormData();
+          fdImg.append('file1', inp.files[0]);
+          fdImg.append('file2', inp.files[1]);
+          fdImg.append('kind', kind);
+          fdImg.append('extra', '');
+          const imgRes = await fetch('/compare', { method: 'POST', body: fdImg });
+          const imgR = await imgRes.json();
+          ['photo', 'bmp_photo'].forEach((key, idx) => {
+            if (imgR[key]) appendImage(imgR[key], `compare_${kind}_${idx}.png`);
+          });
+        };
+      });
+  
+      // Encode
+      document.getElementById('encode-btn').onclick = async () => {
+        clearAll();
+        const inp = document.getElementById('encode-input');
+        if (!inp.files[0]) return alert('請選擇音檔');
+        const fd = new FormData();
+        fd.append('file', inp.files[0]);
+        const res = await fetch('/encode', { method: 'POST', body: fd });
+        const r = await res.json();
+        if (r.photo) appendAudio(r.photo, 'encoded.wav');
+        resultArea.textContent = `Key: ${r.key || ''}`;
+      };
+  
+      // Decode
+      document.getElementById('decode-btn').onclick = async () => {
+        clearAll();
+        const inp = document.getElementById('decode-input');
+        if (!inp.files[0]) return alert('請選擇音檔');
+        const psw = prompt('請輸入密碼：');
+        if (!psw) return;
+        const fd = new FormData();
+        fd.append('file', inp.files[0]);
+        fd.append('psw', psw);
+        const res = await fetch('/decode', { method: 'POST', body: fd });
+        const r = await res.json();
+        if (r.photo) appendAudio(r.photo, 'decoded.wav');
+      };
+  
+      // 傳送至 ESP32 測試（抓第2張圖片網址與分析結果）
+      document.getElementById('uploadToESP32').onclick = async () => {
+        const resultArea = document.getElementById('resultarea');
+        const imgs = document.querySelectorAll('#output-images img');
+        const img2 = imgs[1]?.src;
+        if (!img2) return alert('❌ 找不到第2張圖片');
+
+        // 擷取「總平均」百分比
+        const resultText = resultArea.textContent;
+        const match = resultText.match(/總平均[:：]?\s*(\d+)%\s*~\s*(\d+)%/);
+        const percent = match ? `${match[1]}% ~ ${match[2]}%` : '';
+
+        // 擷取「危險程度」
+        const dangerMatch = resultText.match(/危險程度[:：]?\s*(\S+)/);
+        const dangerLevel = dangerMatch ? dangerMatch[1] : '';
+        alert(`📤 圖片網址：${img2}\n總平均：${percent}\n危險程度：${dangerLevel}`);
+        try {
+          // 建立表單，對應後端的 url, data, percent
+          const form = new FormData();
+          form.append('url', img2);
+          form.append('data', dangerLevel);
+          form.append('percent', percent);
+
+          const res = await fetch('/data', {
+            method: 'POST',
+            body: form
+          });
+          const json = await res.json();
+          if (json.error) {
+            alert('❌ 後端錯誤：' + json.error);
+          } else {
+            alert(
+              `✅ 傳送成功！\n` +
+              `圖片網址：${json.text}\n` +
+              `危險程度：${json.result}\n` +
+              `總平均：${json.per}`
+            );
+          }
+        } catch (err) {
+          console.error(err);
+          alert('❌ 請求失敗：' + err.message);
+        }
+      };
+
+    });
+
+  </script>  
+</body>
+</html> 
