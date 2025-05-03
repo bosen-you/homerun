@@ -11,7 +11,7 @@ class Static(Base):
     filename = Column(String(255), nullable=False) 
     timestamp = Column(DateTime, default=datetime.utcnow)
 
-DB_URL="mysql+pymysql://root:Zaqxswcde12345%40@localhost:3306/image_db"
+DB_URL="your DB_URL"
 engine = create_engine(DB_URL, echo=True)
 Base.metadata.create_all(bind=engine)
 
