@@ -1,6 +1,6 @@
-This folder aims to backend of website. 
-It's a good habit when you written web.
-Having serverl benefit below.  
-1. Seperating frontend and backend.
-2. The backend expect writting means.
- 
+This folder is intended for the **backend** of the website.
+Mantianing a seperate backend is a good practice in web development, providing serveral benefits:
+1. **Seperation of Frontend and Backend**
+   Keeps concerns modular and make the system easier to maintain and scale.
+2. **Dedicated Backend Logic**
+   Allows backend-specific functionalities such as data processing, database operation, and API handing to be written clearly and efficiently.
