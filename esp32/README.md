@@ -1,22 +1,22 @@
 # Intro
-This file contains the file with running code on Esp32, and the code language is Micropython.
+This file contains code that run on the Esp32, written in Micropython.
 
 ## `__init__`
-It helps me easily manger the file.
+This helps manager the file struct more easily.
 
 ## inital
-It helps me easily initialize all devices.
+This code initialize all the devices.
 
 ## I2S (Inter-IC Sound)
-This module includes the microphone and audio player on Esp32, providing detailed information below.
+This module includes the microphone and audio player on Esp32, as described in detailed below.
 ### Intro
-I2S (Inter-IC Sound) is a digital audio transmission standard primarily used for transmitting audio data between digital audio devices.   
+I2S (Inter-IC Sound) is a digital audio transmission standard primarily used for sending audio data between digital audio devices.   
 It was developed by Philips in 1986 and is widely used in digital audio processing and playback devices.
 
 ### function
 1. Digital Audio Transmission:
-It's used to transmit digital audio from one device to another, such as from a digital processer to a digital-to-analog converter (DAC)  
-2. High Audio Quality
+Used to transmit digital audio from one device to another, such as from a digital processer to a digital-to-analog converter (DAC)  
+3. High Audio Quality
 Support high-resolution audio data.
 
 ## I2C (Inter-Integrated Circuit)
@@ -28,10 +28,10 @@ However, the I2C bus can be applied in various control architectures, such as th
 information from 成大WIKI
 
 ## light
-It controls LED open or closed.
+Controls LED open or closed.
 
 ## wifi
-It connects wifi.
+Connects wifi.
 
 ## connect_web 
-It can connect our backend of website, and can imbibe the data from backend, Showing the picture and data analysis on I2C.
+Connect to backend of website, and can retrieving the data from backend, diplaying the picture and data analysis on I2C.
