@@ -1,3 +1,4 @@
+## Intro
 This folder is intended for the **backend** of the website.
 Mantianing a seperate backend is a good practice in web development, providing serveral benefits:
 1. **Seperation of Frontend and Backend**
