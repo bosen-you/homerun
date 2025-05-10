@@ -1,5 +1,5 @@
 # intro
-This file contains the Micropython libraries for **sdcard**, **urequest**, and **ssd1306**.
+This folder contains the Micropython libraries for **sdcard**, **urequest**, and **ssd1306**.
 
 ## SDcard
 Saving for file, similar to how a USB driver work. 
