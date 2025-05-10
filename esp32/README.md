@@ -1,5 +1,5 @@
 # Intro
-This file contains code that run on the Esp32, written in Micropython.
+This folder contains code that run on the Esp32, written in Micropython.
 
 ## `__init__`
 This helps manager the file struct more easily.
