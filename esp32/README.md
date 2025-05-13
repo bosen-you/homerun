@@ -1,5 +1,5 @@
 # ESP32 MicroPython Project
-
+**Notice: This folder is currently non-functional due to incompatibility with the I2S code. Please use `esp32_can_run.py` to execute the program instead**
 This folder contains code written in **MicroPython** for the **ESP32** microcontroller. It includes modules for device initialization, I2S/I2C communication, Wi-Fi connection, and web backend interaction.
 
 ## File Overview
