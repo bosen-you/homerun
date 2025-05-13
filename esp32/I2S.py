@@ -1,15 +1,24 @@
+'''
+Desciption: 
+    This file aims to record and play video using the I2S. 
+    The recorded and played audio is automatically saved in SDcard.
+Notice: 
+    This code isn't currently compatible with the ESP32. 
+    If you manage to modify and run it successfully on the ESP32, feel free to DM me. Thank you!
+'''
+
 from inital import DeviceManage
 import ustruct
 import os
 
 def get_sd_free_bytes(path="/sd"):
-    """取得 SD 卡可用空間（單位：byte）"""
+    "To get sdcard maximum supported"
     stats = os.statvfs(path)
     free_bytes = stats[0] * stats[3]  # f_frsize * f_bavail
     return free_bytes
 
 def estimate_max_duration(sample_rate=16000, bits=16, channels=1, path="/sd"):
-    """依據 SD 卡剩餘空間估算可錄音秒數"""
+    "Calculate the maximum recording duration based on the SD card's available storage capacity."
     bytes_per_sec = sample_rate * (bits // 8) * channels
     free_bytes = get_sd_free_bytes(path)
     return free_bytes // bytes_per_sec
@@ -50,7 +59,7 @@ async def record_wav(path, duration_s, filename):
                 f.write(audio_buf[:num_read])
                 remaining -= num_read
 
-    print(f"✅ 錄音完成，儲存為 {full_path}")
+    print(f"✅ recording successfully，saved to {full_path}")
 
 async def play_wav(path):
     with open(path, "rb") as f:
