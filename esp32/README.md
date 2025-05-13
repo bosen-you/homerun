@@ -1,37 +1,58 @@
-# Intro
-This folder contains code that run on the Esp32, written in Micropython.
+# ESP32 MicroPython Project
 
-## `__init__`
-This helps manager the file struct more easily.
+This folder contains code written in **MicroPython** for the **ESP32** microcontroller. It includes modules for device initialization, I2S/I2C communication, Wi-Fi connection, and web backend interaction.
 
-## inital
-This code initialize all the devices.
+## File Overview
+
+- `__init__.py`  
+  Helps manage the folder as a Python package and organize file structure more effectively.
+
+- `init.py`  
+  Initializes all connected devices when the ESP32 starts.
+
+- `i2s.py`  
+  Handles I2S communication for microphone input and audio output.
+
+- `i2c.py`  
+  Manages I2C communication with peripherals like displays or sensors.
+
+- `light.py`  
+  Controls an LED—turning it on or off.
+
+- `wifi.py`  
+  Connects the ESP32 to a Wi-Fi network.
+
+- `connect_web.py`  
+  Connects to a web backend, retrieves data, displays images and performs data visualization using I2C-connected devices.
+
+---
 
 ## I2S (Inter-IC Sound)
-This module includes the microphone and audio player on Esp32, as described in detailed below.
-### Intro
-I2S (Inter-IC Sound) is a digital audio transmission standard primarily used for sending audio data between digital audio devices.   
-It was developed by Philips in 1986 and is widely used in digital audio processing and playback devices.
 
-### function
-1. Digital Audio Transmission:
-Used to transmit digital audio from one device to another, such as from a digital processer to a digital-to-analog converter (DAC)  
-3. High Audio Quality
-Support high-resolution audio data.
+### Overview
+I2S is a digital audio transmission standard used for transferring audio between digital devices. Developed by Philips in 1986, it's commonly used in modern audio systems for its support of high-resolution audio.
+
+### Features
+1. **Digital Audio Transmission** – Transfers audio from devices like a digital signal processor (DSP) to a digital-to-analog converter (DAC).  
+2. **High Audio Quality** – Supports high-resolution audio formats.
+
+---
 
 ## I2C (Inter-Integrated Circuit)
-I2C (Inter-Integrated Circuit) is a type of serial communication bus designed for internal integrated circuits.
-It was developed by Philips in the 1980s to allow motherboards, mobile phones, and embedded systems to connect to low-speed peripheral devices.
-I2C is mainly used for board-to-board communication and is not suitable for long-distance data transmission.  
 
-However, the I2C bus can be applied in various control architectures, such as the System Management Bus (SMBus), Power Management Bus (PMBus), Intelligent Platform Management Interface (IPMI), Display Data Channel (DDC), and Advanced Telecom Computing Architecture (ATCA).  
-information from 成大WIKI
+### Overview
+I2C is a serial communication protocol designed for communication between integrated circuits. It is commonly used for short-distance communication in embedded systems.
 
-## light
-Controls LED open or closed.
+### Applications
+- Display Data Channel (DDC)
+- System Management Bus (SMBus)
+- Power Management Bus (PMBus)
+- IPMI and ATCA platforms
 
-## wifi
-Connects wifi.
+*Source: NCKU Wiki*
 
-## connect_web 
-Connect to backend of website, and can retrieving the data from backend, diplaying the picture and data analysis on I2C.
+---
+
+## Wi-Fi & Web Integration
+
+This project also connects the ESP32 to a backend server via Wi-Fi, allowing real-time data fetching and displaying the results (including images) through an I2C-connected screen or other peripherals.
