@@ -12,6 +12,8 @@ import ssl
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21), freq=100000)  #Init i2c
 oled = SSD1306_I2C(128, 64, i2c)
 oled.fill(0)
+
+# decode url
 def unquote(s):
     res = ''
     i = 0
@@ -36,6 +38,7 @@ def unquote(s):
             i += 1
     return res
 
+# connect wifi
 def connect_wifi(ssid, password, retries=10):
         wlan = network.WLAN(network.STA_IF)
         wlan.active(True)
