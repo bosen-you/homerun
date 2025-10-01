@@ -1,6 +1,7 @@
 ## intro
-This folder includes audio operations such as transforming audio into waveform or frequency spectrum, extracting features from two audio files for comparison, and encoding/decoding audio using keys.   
-The following sections provide a detailed explanation of each item.
+This folder includes audio operations such as transforming audio into waveform or frequency spectrum, extracting features from two audio files to comparison, encoding/decoding audio using keys, saving file in database, and changing photo from .bin to .wav. The following sections provide a detailed explanation of each item.
 
-## Transforming audio into waveform or frequency spectrum
-We use 
+## `__init__`
+To include all fuction in utils to main.py
+
+## change_
